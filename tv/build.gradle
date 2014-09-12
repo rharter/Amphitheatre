@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId "com.jerrellmardis.amphitheatre"
-        minSdkVersion 'L'
-        targetSdkVersion 'L'
+        minSdkVersion 'android-L'
+        targetSdkVersion 'android-L'
         versionCode 1
         versionName "1.0"
         renderscriptTargetApi 19

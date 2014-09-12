@@ -17,6 +17,8 @@
 package com.jerrellmardis.amphitheatre.fragment;
 
 import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -78,7 +80,7 @@ import java.util.TreeSet;
 import static android.view.View.OnClickListener;
 
 public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragment
-        implements AddSourceDialogFragment.OnClickListener {
+        implements ManualSourceEntryFragment.OnClickListener {
 
     private final Handler mHandler = new Handler();
 
@@ -651,9 +653,9 @@ public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragm
 
     private void showAddSourceDialog() {
         FragmentManager fm = getFragmentManager();
-        AddSourceDialogFragment addSourceDialog = AddSourceDialogFragment.newInstance();
+        DialogFragment addSourceDialog = new NewSourceFragment();
         addSourceDialog.setTargetFragment(this, 0);
-        addSourceDialog.show(fm, AddSourceDialogFragment.class.getSimpleName());
+        addSourceDialog.show(fm, ManualSourceEntryFragment.class.getSimpleName());
     }
 
     private class UpdateBackgroundTask extends TimerTask {

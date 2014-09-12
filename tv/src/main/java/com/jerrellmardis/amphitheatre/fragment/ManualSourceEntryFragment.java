@@ -43,7 +43,7 @@ import butterknife.OnClick;
 import butterknife.OnItemSelected;
 
 
-public class AddSourceDialogFragment extends DialogFragment implements OnSharesFoundListener {
+public class ManualSourceEntryFragment extends DialogFragment implements OnSharesFoundListener {
 
     private OnClickListener mOnClickListener;
     private NetworkSearchTask mSearchTask;
@@ -55,8 +55,8 @@ public class AddSourceDialogFragment extends DialogFragment implements OnSharesF
     @InjectView(R.id.path) EditText mPathText;
     @InjectView(R.id.radio_movie) RadioButton mMovieRadioButton;
 
-    public static AddSourceDialogFragment newInstance() {
-        return new AddSourceDialogFragment();
+    public static ManualSourceEntryFragment newInstance() {
+        return new ManualSourceEntryFragment();
     }
 
     public interface OnClickListener {
