@@ -24,9 +24,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
@@ -55,6 +57,7 @@ import com.jerrellmardis.amphitheatre.service.RecommendationsService;
 import com.jerrellmardis.amphitheatre.task.GetFilesTask;
 import com.jerrellmardis.amphitheatre.util.BlurTransform;
 import com.jerrellmardis.amphitheatre.util.Constants;
+import com.jerrellmardis.amphitheatre.util.Enums;
 import com.jerrellmardis.amphitheatre.util.PicassoBackgroundManagerTarget;
 import com.jerrellmardis.amphitheatre.util.SecurePreferences;
 import com.jerrellmardis.amphitheatre.util.VideoUtils;
@@ -63,6 +66,7 @@ import com.jerrellmardis.amphitheatre.widget.GridItemPresenter;
 import com.jerrellmardis.amphitheatre.widget.SortedObjectAdapter;
 import com.jerrellmardis.amphitheatre.widget.TvShowsCardPresenter;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
 import com.squareup.picasso.Transformation;
 
@@ -80,7 +84,7 @@ import java.util.TreeSet;
 import static android.view.View.OnClickListener;
 
 public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragment
-        implements ManualSourceEntryFragment.OnClickListener {
+        implements AddSourceDialogFragment.OnClickListener, CustomizeDialogFragment.OnSaveListener{
 
     private final Handler mHandler = new Handler();
 
@@ -529,6 +533,7 @@ public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragm
         HeaderItem gridHeader = new HeaderItem(0, getString(R.string.settings), null);
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(new GridItemPresenter(getActivity()));
         gridRowAdapter.add(getString(R.string.add_source));
+        gridRowAdapter.add(getString(R.string.customization));
         mAdapter.add(new ListRow(gridHeader, gridRowAdapter));
     }
 
@@ -548,14 +553,23 @@ public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragm
     }
 
     private void updateBackground(String url) {
-        Picasso.with(getActivity())
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getActivity().getApplicationContext());
+
+        RequestCreator requestCreator = Picasso.with(getActivity())
                 .load(url)
-                .transform(mBlurTransformation)
                 .placeholder(R.drawable.placeholder)
                 .resize(mMetrics.widthPixels, mMetrics.heightPixels)
                 .centerCrop()
-                .skipMemoryCache()
-                .into(mBackgroundTarget);
+                .skipMemoryCache();
+
+        switch(Enums.BlurState.valueOf(sharedPrefs.getString(Constants.BACKGROUND_BLUR, ""))) {
+            case ON:
+                requestCreator = requestCreator.transform(mBlurTransformation);
+                break;
+        }
+
+        requestCreator.into(mBackgroundTarget);
     }
 
     private void clearBackground() {
@@ -646,6 +660,8 @@ public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragm
                     startActivity(intent);
                 } else if (item instanceof String && ((String) item).contains(getString(R.string.add_source))) {
                     showAddSourceDialog();
+                } else if (item instanceof String && ((String) item).contains(getString(R.string.customization))) {
+                    showCustomizeDialog();
                 }
             }
         };
@@ -656,6 +672,18 @@ public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragm
         DialogFragment addSourceDialog = new NewSourceFragment();
         addSourceDialog.setTargetFragment(this, 0);
         addSourceDialog.show(fm, ManualSourceEntryFragment.class.getSimpleName());
+    }
+
+    private void showCustomizeDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+        CustomizeDialogFragment customizeFragment = new CustomizeDialogFragment();
+        customizeFragment.setTargetFragment(this, 0);
+        customizeFragment.show(fragmentManager, CustomizeDialogFragment.class.getSimpleName());
+    }
+
+    @Override
+    public void onSaveCustomization() {
+        reloadAdapters();
     }
 
     private class UpdateBackgroundTask extends TimerTask {

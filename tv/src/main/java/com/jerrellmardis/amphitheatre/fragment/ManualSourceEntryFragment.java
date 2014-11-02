@@ -90,7 +90,8 @@ public class ManualSourceEntryFragment extends DialogFragment implements OnShare
         return dialog;
     }
 
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mShareAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_spinner_item);
