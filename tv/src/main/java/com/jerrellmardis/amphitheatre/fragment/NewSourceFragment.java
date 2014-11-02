@@ -27,7 +27,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -47,7 +50,7 @@ public class NewSourceFragment extends DialogFragment {
 
     private static final String KEY_PATH = "path";
 
-    private static final String DEFAULT_PATH = "smb://192.168.1.8/";
+    private static final String DEFAULT_PATH = "smb://";
 
     private Stack<PathComponent> mPathStack = new Stack<PathComponent>();
 
@@ -82,7 +85,12 @@ public class NewSourceFragment extends DialogFragment {
         }
 
         showLoading();
-        loadPath(path);
+
+        if (TextUtils.isEmpty(path)) {
+            loadReachableServers();
+        } else {
+            loadPath(path);
+        }
     }
 
     private void showLoading() {
@@ -102,6 +110,10 @@ public class NewSourceFragment extends DialogFragment {
         mErrorText.setVisibility(View.GONE);
         mLoading.setVisibility(View.GONE);
         mListContainer.setVisibility(View.VISIBLE);
+    }
+
+    private void loadReachableServers() {
+        new LoadReachableServersTask().execute();
     }
 
     private void loadPath(String path) {
@@ -211,6 +223,11 @@ public class NewSourceFragment extends DialogFragment {
         @Override protected PathComponent doInBackground(PathComponent... paths) {
             PathComponent component = paths[0];
 
+            String path = component.path;
+            if (!path.endsWith("/")) {
+                path += "/";
+            }
+
             NtlmPasswordAuthentication auth = null;
             if (!TextUtils.isEmpty(component.username)) {
                 auth = new NtlmPasswordAuthentication("", component.username, component.password);
@@ -243,6 +260,39 @@ public class NewSourceFragment extends DialogFragment {
                 component.files.add(file.getPath());
             }
 
+            return component;
+        }
+
+        @Override protected void onPostExecute(PathComponent component) {
+            onLoadPathResult(component);
+        }
+    }
+
+    private class LoadReachableServersTask extends AsyncTask<Void, Void, PathComponent> {
+
+        @Override protected PathComponent doInBackground(Void... params) {
+            PathComponent component = new PathComponent("");
+            component.files = new ArrayList<String>();
+            for (int i = 0; i < 256; i++) {
+                try {
+                    Log.d(TAG, "Testing address: 192.168.1." + i);
+                    InetAddress address = InetAddress.getByName(String.format("192.168.1.%d", i));
+                    if (!address.isReachable(50)) {
+                        continue;
+                    }
+
+                    if (!TextUtils.isEmpty(address.getHostName())) {
+                        component.files.add(String.format("smb://%s/", address.getHostName()));
+                    } else {
+                        component.files.add(String.format("smb://%s/", address.getHostAddress()));
+                    }
+                } catch (UnknownHostException e) {
+                    // No big deal
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            component.status = PathComponent.STATUS_SUCCESS;
             return component;
         }
 
