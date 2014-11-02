@@ -16,9 +16,33 @@
 
 package com.jerrellmardis.amphitheatre.fragment;
 
+import com.jerrellmardis.amphitheatre.R;
+import com.jerrellmardis.amphitheatre.activity.DetailsActivity;
+import com.jerrellmardis.amphitheatre.activity.GridViewActivity;
+import com.jerrellmardis.amphitheatre.activity.SearchActivity;
+import com.jerrellmardis.amphitheatre.model.GridGenre;
+import com.jerrellmardis.amphitheatre.model.Source;
+import com.jerrellmardis.amphitheatre.model.Video;
+import com.jerrellmardis.amphitheatre.model.VideoGroup;
+import com.jerrellmardis.amphitheatre.service.RecommendationsService;
+import com.jerrellmardis.amphitheatre.task.GetFilesTask;
+import com.jerrellmardis.amphitheatre.util.BlurTransform;
+import com.jerrellmardis.amphitheatre.util.Constants;
+import com.jerrellmardis.amphitheatre.util.Enums;
+import com.jerrellmardis.amphitheatre.util.PicassoBackgroundManagerTarget;
+import com.jerrellmardis.amphitheatre.util.SecurePreferences;
+import com.jerrellmardis.amphitheatre.util.VideoUtils;
+import com.jerrellmardis.amphitheatre.widget.CardPresenter;
+import com.jerrellmardis.amphitheatre.widget.GridItemPresenter;
+import com.jerrellmardis.amphitheatre.widget.SortedObjectAdapter;
+import com.jerrellmardis.amphitheatre.widget.TvShowsCardPresenter;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
+import com.squareup.picasso.Target;
+import com.squareup.picasso.Transformation;
+
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,31 +69,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.jerrellmardis.amphitheatre.R;
-import com.jerrellmardis.amphitheatre.activity.DetailsActivity;
-import com.jerrellmardis.amphitheatre.activity.GridViewActivity;
-import com.jerrellmardis.amphitheatre.activity.SearchActivity;
-import com.jerrellmardis.amphitheatre.model.GridGenre;
-import com.jerrellmardis.amphitheatre.model.Source;
-import com.jerrellmardis.amphitheatre.model.Video;
-import com.jerrellmardis.amphitheatre.model.VideoGroup;
-import com.jerrellmardis.amphitheatre.service.RecommendationsService;
-import com.jerrellmardis.amphitheatre.task.GetFilesTask;
-import com.jerrellmardis.amphitheatre.util.BlurTransform;
-import com.jerrellmardis.amphitheatre.util.Constants;
-import com.jerrellmardis.amphitheatre.util.Enums;
-import com.jerrellmardis.amphitheatre.util.PicassoBackgroundManagerTarget;
-import com.jerrellmardis.amphitheatre.util.SecurePreferences;
-import com.jerrellmardis.amphitheatre.util.VideoUtils;
-import com.jerrellmardis.amphitheatre.widget.CardPresenter;
-import com.jerrellmardis.amphitheatre.widget.GridItemPresenter;
-import com.jerrellmardis.amphitheatre.widget.SortedObjectAdapter;
-import com.jerrellmardis.amphitheatre.widget.TvShowsCardPresenter;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
-import com.squareup.picasso.Target;
-import com.squareup.picasso.Transformation;
-
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ import java.util.TreeSet;
 import static android.view.View.OnClickListener;
 
 public class BrowseFragment extends android.support.v17.leanback.app.BrowseFragment
-        implements AddSourceDialogFragment.OnClickListener, CustomizeDialogFragment.OnSaveListener{
+        implements ManualSourceEntryFragment.OnClickListener, CustomizeDialogFragment.OnSaveListener {
 
     private final Handler mHandler = new Handler();
 

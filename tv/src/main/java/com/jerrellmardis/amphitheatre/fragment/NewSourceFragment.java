@@ -4,12 +4,9 @@ import com.jerrellmardis.amphitheatre.R;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,7 +47,7 @@ public class NewSourceFragment extends DialogFragment {
 
     private static final String KEY_PATH = "path";
 
-    private static final String DEFAULT_PATH = "smb://";
+    private static final String DEFAULT_PATH = "smb://192.168.1.8/";
 
     private Stack<PathComponent> mPathStack = new Stack<PathComponent>();
 
@@ -162,7 +159,7 @@ public class NewSourceFragment extends DialogFragment {
         if (animated) {
             l.setVisibility(View.GONE);
             mListContainer.addView(l);
-            ValueAnimator anim = ViewAnimationUtils.createCircularReveal(l, mRevealCenterX,
+            Animator anim = ViewAnimationUtils.createCircularReveal(l, mRevealCenterX,
                     mRevealCenterY, 0, mListContainer.getHeight());
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override public void onAnimationEnd(Animator animation) {
